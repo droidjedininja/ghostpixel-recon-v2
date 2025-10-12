@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GhostPixel Recon v2</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #eee;
+      font-family: monospace;
+      padding: 20px;
+    }
+    h1 {
+      color: #0ff;
+      text-shadow: 0 0 5px #0ff;
+    }
+    .result {
+      margin-bottom: 10px;
+      padding: 5px;
+      border-left: 4px solid;
+    }
+    .loaded { border-color: #0f0; }
+    .failed { border-color: #f00; }
+    .redirect { border-color: #ff0; }
+    .meta { font-size: 0.9em; color: #aaa; }
+    input, select, button {
+      margin: 10px 0;
+      padding: 5px;
+      font-family: monospace;
+      background: #222;
+      color: #eee;
+      border: 1px solid #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>GhostPixel Recon v2</h1>
+  <p>Browser-native recon engine for image load behavior, headers, redirects, and SSRF detection.</p>
+
+  <label for="mode">Recon Mode:</label>
+  <select id="mode">
+    <option value="basic">Basic</option>
+    <option value="advanced">Advanced</option>
+    <option value="workshop">Workshop</option>
+  </select>
+
+  <br>
+  <label for="customUrl">Test a Custom URL:</label>
+  <input type="text" id="customUrl" placeholder="https://example.com/image.jpg">
+  <button onclick="runRecon()">Run Recon</button>
+
+  <div id="results"></div>
+  <button onclick="downloadLog()">Download Log</button>
+
+  <script>
+    let results = [];
+
+    function runRecon() {
+      results = [];
+      document.getElementById("results").innerHTML = "";
+
+      const url = document.getElementById("customUrl").value.trim();
+      const mode = document.getElementById("mode").value;
+      if (!url) return alert("Enter a URL to test.");
+
+      testImage(url, mode);
+    }
+
+    function testImage(url, mode) {
+      const img = new Image();
+      const start = performance.now();
+
+      img.onload = () => {
+        logResult(url, "✅ Loaded", "loaded", performance.now() - start);
+      };
+
+      img.onerror = () => {
+        logResult(url, "❌ Failed", "failed", performance.now() - start);
+      };
+
+      img.src = url;
+
+      if (mode !== "workshop") {
+        checkHeaders(url, mode);
+        checkOptions(url);
+      }
+    }
+
+    async function checkHeaders(url, mode) {
+      try {
+        const res = await fetch(url, { method: 'HEAD' });
+        const headers = {};
+        for (let [key, value] of res.headers.entries()) {
+          headers[key] = value;
+        }
+
+        const location = res.headers.get("Location");
+        if (location) {
+          logResult(url, `🔁 Redirect → ${location}`, "redirect", 0);
+        }
+
+        if (mode === "advanced") {
+          const fingerprint = fingerprintHeaders(headers);
+          logResult(url, `🧠 Headers: ${JSON.stringify(headers, null, 2)}\n🔍 Fingerprint: ${fingerprint}`, "meta", 0);
+        }
+      } catch (err) {
+        console.warn(`Header check failed for ${url}`);
+      }
+    }
+
+    async function checkOptions(url) {
+      try {
+        const res = await fetch(url, { method: 'OPTIONS' });
+        const allow = res.headers.get("Allow");
+        const cors = res.headers.get("Access-Control-Allow-Origin");
+        if (allow || cors) {
+          logResult(url, `🧪 OPTIONS: Allow=${allow}, CORS=${cors}`, "meta", 0);
+        }
+      } catch (err) {
+        console.warn(`OPTIONS check failed for ${url}`);
+      }
+    }
+
+    function fingerprintHeaders(headers) {
+      const tags = [];
+      if (headers["x-powered-by"]) tags.push(headers["x-powered-by"]);
+      if (headers["server"]) tags.push(headers["server"]);
+      if (!headers["x-frame-options"]) tags.push("Missing X-Frame-Options");
+      if (!headers["content-security-policy"]) tags.push("Missing CSP");
+      return tags.join(", ");
+    }
+
+    function logResult(url, status, cssClass, time) {
+      results.push({ url, status, cssClass, time });
+      updateUI();
+      sendToWebhook({ url, status, time });
+    }
+
+    function updateUI() {
+      const container = document.getElementById("results");
+      container.innerHTML = results.map(r => `
+        <div class="result ${r.cssClass}">
+          <strong>${r.status}</strong><br>
+          <span class="meta">${r.url} (${r.time.toFixed(1)}ms)</span>
+        </div>
+      `).join("");
+    }
+
+    function downloadLog() {
+      const blob = new Blob([JSON.stringify(results, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "ghostpixel-log-v2.json";
+      link.click();
+    }
+
+    function sendToWebhook(data) {
+      fetch("https://your-bugbounty-endpoint.example.com/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).catch(() => console.warn("Webhook failed"));
+    }
+  </script>
+</body>
+</html>
