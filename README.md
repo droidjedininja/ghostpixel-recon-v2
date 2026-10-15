@@ -1,44 +1,18 @@
-# 🕵️‍♂️ GhostPixel Recon v2
+# ExposedAPI iOS — native starter
 
-GhostPixel is a browser-native recon engine that probes image URLs for load success, redirect chains, SSRF exposure, and header misconfigurations. Built for ethical hackers, educators, and artists remixing the web for justice.
+A small SwiftUI iPhone app that performs one authorized HTTPS GET check, shows HTTP status, content type, and CORS headers, and prevents cross-host redirects. No Kali or server is required to perform this check.
 
-## 🔍 Features
+## Build on macOS
+1. Install Xcode.
+2. Create a new iOS App project named `ExposedAPI` (SwiftUI, Swift).
+3. Replace the generated `ExposedAPIApp.swift` and `ContentView.swift` with the files in `ExposedAPI/`.
+4. Set your signing team under Signing & Capabilities.
+5. Connect your iPhone and select it as the run destination, then press Run. Developer Mode may need to be enabled on the phone.
 
-- ✅ Image load detection (`Image.onerror`)
-- ✅ Header fingerprinting (`fetch HEAD`)
-- ✅ Redirect tracing
-- ✅ CORS and OPTIONS probing
-- ✅ Timing analysis
-- ✅ Mode toggle: Basic / Advanced / Workshop
-- ✅ JSON log export
-- ✅ Webhook logging (optional)
-
-## 🧪 How to Use
-
-1. Open `index.html` in your browser
-2. Paste a custom image URL
-3. Choose a mode and click **Run Recon**
-4. View results and download logs
-5. (Optional) Configure webhook endpoint in the script
-
-## 🎨 Remix Ideas
-
-- QR-triggered murals
-- Zine companion for workshops
-- Recon challenges with scoring
-- Forkable templates for civic tech audits
-
-## ⚠️ Ethical Use
-
-GhostPixel is for educational and ethical hacking only.  
-Always test within scope. Always report responsibly.  
-Never use this tool for unauthorized scanning or exploitation.
-
-## 📡 Credits
-
-Built by Y in the Bronx  
-Remix it. Teach with it. Build movements with it.
-
-## 📜 License
-
-This project is licensed under the MIT License. See `LICENSE` for details.
+## Limitations
+- This is source code, not an installable .ipa.
+- A Mac with Xcode or a configured remote macOS build service is needed to compile/sign a native iOS app.
+- Only a single HTTPS GET request per scan; no crawling, authentication, subdomain enumeration, or automated vulnerability exploitation.
+- Host must match the explicitly entered allowed hostname exactly. Redirects are not followed.
+- A reflected Origin header is only a review candidate, not proof of a vulnerability.
+- No persistent scan history in this starter.
