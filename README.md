@@ -15,7 +15,7 @@ GhostPixel is a browser-native recon engine that probes image URLs for load succ
 
 ## 🧪 How to Use
 
-1. Open `ghostpixel.html` in your browser
+1. Open `index.html` in your browser
 2. Paste a custom image URL
 3. Choose a mode and click **Run Recon**
 4. View results and download logs
