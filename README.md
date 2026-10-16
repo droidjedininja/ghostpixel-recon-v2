@@ -32,12 +32,6 @@ A tiny browser-based recon/workshop tool that checks whether an image URL loads 
 
 This repo includes a simple GitHub Actions workflow to publish the repository to GitHub Pages from the main branch.
 
-To enable Pages:
-
-1. Go to the repository Settings → Pages.
-2. Ensure the source is set to "Deploy from a GitHub Action" or the default branch.
-3. The workflow will publish the repository content as a static site. If Pages does not appear immediately, confirm Actions permissions and allow the deploy action to run.
-
 ## Implementation notes
 
 - Primary file: `index.html` (UI, JS, and CSS in a single file).
