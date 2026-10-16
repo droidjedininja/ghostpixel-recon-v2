@@ -1,21 +1,25 @@
 # GhostPixel — Bronx Edition
 
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 A tiny browser-based recon/workshop tool that checks whether an image URL loads from the client and reports host, dimensions, and load time. Built as a single HTML page with embedded CSS and JavaScript.
+
+
+## Demo
+
+![Screenshot](assets/screenshot.svg)
+
 
 ## Features
 - Enter an image URL and measure whether it loads, its size (width × height), and load time.
-- Saves a local history of scans using localStorage.
+- Saves a local history of scans using localStorage (exportable JSON).
 - Quick workshop buttons to set example image targets.
 
 ## Usage
 1. Open `index.html` in your browser (or host it on any static file server).
 2. Enter an image URL (for example: `https://example.com/image.png`).
-3. Click "Run Scan" — results will show in the Results panel.
-4. Use "Clear History" to remove stored scan history.
-
-Workshop target buttons set the input field to:
-- Python logo: `https://www.python.org/static/community_logos/python-logo.png`
-- Large image: `https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg`
+3. Click "Run Scan" — results will show in the Results panel and a preview will appear on success.
+4. Use "Clear History" to remove stored scan history or "Export JSON" to download it.
 
 ## Implementation notes
 - UI is a single HTML file (`index.html`) with inline CSS and JavaScript.

@@ -1,0 +1,12 @@
+# Git ignore
+
+# Node
+node_modules/
+
+# macOS
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*

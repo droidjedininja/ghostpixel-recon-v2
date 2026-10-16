@@ -48,6 +48,12 @@ button{
     padding:10px;
     border-left:4px solid #00ffe1;
 }
+
+.preview{
+    max-width:100%;
+    margin-top:10px;
+    border:1px solid #333;
+}
 </style>
 </head>
 
@@ -71,17 +77,21 @@ Run Scan
 Clear History
 </button>
 
+<button onclick="exportHistory()">
+Export JSON
+</button>
+
 </div>
 
 <div class="panel">
 
 <h3>Workshop Targets</h3>
 
-<button onclick="setTarget('https://www.python.org/static/community\_logos/python-logo.png')">
+<button onclick="setTarget('https://www.python.org/static/community_logos/python-logo.png')">
 Python
 </button>
 
-<button onclick="setTarget('https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock\_big.jpg')">
+<button onclick="setTarget('https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg')">
 Large Image
 </button>
 
@@ -92,6 +102,7 @@ Large Image
 <h3>Results</h3>
 
 <div id="results"></div>
+<img id="preview" class="preview" alt="Image preview" style="display:none">
 
 </div>
 
@@ -105,56 +116,41 @@ Large Image
 
 <script>
 
+const MAX_HISTORY = 50;
+
 function setTarget(url){
     document.getElementById("targetUrl").value=url;
 }
 
 function saveHistory(item){
 
-    let history=
-    JSON.parse(
-        localStorage.getItem(
-            "ghostpixel-history"
-        ) || "[]"
-    );
+    let history = JSON.parse(localStorage.getItem("ghostpixel-history") || "[]");
 
     history.unshift(item);
 
-    localStorage.setItem(
-        "ghostpixel-history",
-        JSON.stringify(history)
-    );
+    if(history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+
+    localStorage.setItem("ghostpixel-history", JSON.stringify(history));
 
     loadHistory();
 }
 
 function loadHistory(){
 
-    let history=
-    JSON.parse(
-        localStorage.getItem(
-            "ghostpixel-history"
-        ) || "[]"
-    );
+    let history = JSON.parse(localStorage.getItem("ghostpixel-history") || "[]");
 
-    const div=
-    document.getElementById(
-        "history"
-    );
+    const div = document.getElementById("history");
 
-    div.innerHTML="";
+    div.innerHTML = "";
 
     history.forEach(item=>{
 
-        const row=
-        document.createElement("div");
+        const row = document.createElement("div");
 
-        row.className="result";
+        row.className = "result";
 
-        row.textContent=
-        item.host+
-        " | "+
-        item.status;
+        // simple text content to avoid injecting HTML
+        row.textContent = `${item.time} | ${item.host} | ${item.status}`;
 
         div.appendChild(row);
 
@@ -163,104 +159,98 @@ function loadHistory(){
 
 function clearHistory(){
 
-    localStorage.removeItem(
-        "ghostpixel-history"
-    );
+    localStorage.removeItem("ghostpixel-history");
 
     loadHistory();
 }
 
+function exportHistory(){
+    const history = JSON.parse(localStorage.getItem("ghostpixel-history") || "[]");
+    const blob = new Blob([JSON.stringify(history, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ghostpixel-history.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+}
+
 function runScan(){
 
-    const url=
-    document.getElementById(
-        "targetUrl"
-    ).value.trim();
+    const url = document.getElementById("targetUrl").value.trim();
 
     if(!url){
-
-        alert(
-            "Enter an image URL"
-        );
-
+        alert("Enter an image URL");
         return;
-
     }
 
     let parsed;
 
     try{
-
-        parsed=
-        new URL(url);
-
-    }catch{
-
-        alert(
-            "Invalid URL"
-        );
-
+        parsed = new URL(url);
+    }catch(e){
+        alert("Invalid URL. Make sure it starts with http:// or https://");
         return;
-
     }
 
-    const img=
-    new Image();
+    const img = new Image();
+    const preview = document.getElementById('preview');
+    preview.style.display = 'none';
+    preview.src = '';
 
-    const start=
-    performance.now();
+    const start = performance.now();
 
-    img.onload=()=>{
+    img.onload = ()=>{
 
-        const ms=
-        Math.round(
-            performance.now()-start
-        );
+        const ms = Math.round(performance.now() - start);
 
-        const result=
-        `
-        ✅ Loaded<br>
-        Host: ${parsed.hostname}<br>
-        Size:
-        ${img.naturalWidth}
-        ×
-        ${img.naturalHeight}<br>
-        Time:
-        ${ms}ms
-        `;
+        const result = `\n        ✅ Loaded\n        Host: ${parsed.hostname}\n        Size: ${img.naturalWidth} × ${img.naturalHeight}\n        Time: ${ms}ms\n        `;
 
-        document.getElementById(
-            "results"
-        ).innerHTML=
-        `<div class="result">
-        ${result}
-        </div>`;
+        document.getElementById("results").innerHTML = `<div class="result">${escapeHtml(result).replace(/\n/g,'<br>')}</div>`;
+
+        // show preview
+        preview.src = url;
+        preview.style.display = 'block';
 
         saveHistory({
-            host:parsed.hostname,
-            status:"Loaded"
+            time: new Date().toISOString(),
+            host: parsed.hostname,
+            status: `Loaded ${img.naturalWidth}x${img.naturalHeight} ${ms}ms`,
+            url: url
         });
 
     };
 
-    img.onerror=()=>{
+    img.onerror = (ev)=>{
 
-        document.getElementById(
-            "results"
-        ).innerHTML=
-        `<div class="result">
-        ❌ Failed
-        </div>`;
+        document.getElementById("results").innerHTML = `<div class="result">❌ Failed to load image. This may be a network/CORS issue or the resource does not exist.</div>`;
+
+        preview.style.display = 'none';
 
         saveHistory({
-            host:parsed.hostname,
-            status:"Failed"
+            time: new Date().toISOString(),
+            host: parsed.hostname,
+            status: 'Failed',
+            url: url
         });
 
     };
 
-    img.src=url;
+    // set crossOrigin to anonymous to try to avoid tainting canvas if later added
+    img.crossOrigin = 'anonymous';
+    img.src = url;
 
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/\"/g, "&quot;")
+         .replace(/'/g, "&#039;");
 }
 
 loadHistory();
