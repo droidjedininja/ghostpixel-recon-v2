@@ -1,39 +1,59 @@
 # GhostPixel — Bronx Edition
 
-![License](https://img.shields.io/badge/license-MIT-blue)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-A tiny browser-based recon/workshop tool that checks whether an image URL loads from the client and reports host, dimensions, and load time. Built as a single HTML page with embedded CSS and JavaScript.
-
+A tiny browser-based recon/workshop tool that checks whether an image URL loads from the client and reports host, dimensions, and load time. The app is a single static HTML page with minimal JS — ideal for workshops or quick client-side checks.
 
 ## Demo
 
 ![Screenshot](assets/screenshot.svg)
 
-
 ## Features
+
 - Enter an image URL and measure whether it loads, its size (width × height), and load time.
 - Saves a local history of scans using localStorage (exportable JSON).
 - Quick workshop buttons to set example image targets.
+- Lightweight single-file UI (index.html).
 
-## Usage
-1. Open `index.html` in your browser (or host it on any static file server).
-2. Enter an image URL (for example: `https://example.com/image.png`).
-3. Click "Run Scan" — results will show in the Results panel and a preview will appear on success.
-4. Use "Clear History" to remove stored scan history or "Export JSON" to download it.
+## Getting started
+
+1. Clone the repository:
+
+   git clone https://github.com/droidjedininja/ghostpixel-recon-v2.git
+
+2. Open index.html in your browser (or serve the directory with a static web server):
+
+   - Example (Python 3): python -m http.server 8000
+   - Then visit http://localhost:8000 in your browser.
+
+3. Enter an image URL and click "Run Scan". Results and a preview appear on success.
+
+## Deploy to GitHub Pages
+
+This repo includes a simple GitHub Actions workflow to publish the repository to GitHub Pages from the main branch.
+
+To enable Pages:
+
+1. Go to the repository Settings → Pages.
+2. Ensure the source is set to "Deploy from a GitHub Action" or the default branch.
+3. The workflow will publish the repository content as a static site. If Pages does not appear immediately, confirm Actions permissions and allow the deploy action to run.
 
 ## Implementation notes
-- UI is a single HTML file (`index.html`) with inline CSS and JavaScript.
-- History is stored under localStorage key `ghostpixel-history`.
-- The app uses the `Image()` API and `performance.now()` to measure load times.
-- No server-side code — everything runs client-side in the browser.
+
+- Primary file: `index.html` (UI, JS, and CSS in a single file).
+- History is stored under localStorage key `ghostpixel-history` and capped to the most recent 50 records.
+- The app uses the Image() API and `performance.now()` to measure load times. `img.crossOrigin = 'anonymous'` is set to reduce canvas tainting if extended later.
 
 ## Security & Privacy
-- This tool performs only client-side requests from the user’s browser.
-- Be mindful that loading third-party images may cause the browser to make network requests to remote hosts; do not scan targets you do not have permission to test.
 
-## Development
-- Primary language: HTML
-- Files: `index.html` (app), `LICENSE` (MIT)
+- This tool runs entirely client-side in the user's browser. It triggers standard browser network requests to the target hosts.
+- Do not scan targets you do not have permission to test.
+- If you find a security issue, see SECURITY.md for reporting guidance.
+
+## Contributing
+
+See .github/CONTRIBUTING.md for contribution guidelines. Small improvements, bug fixes, and documentation updates are welcome — please open a PR.
 
 ## License
-This project is licensed under the MIT License. See `LICENSE` for details.
+
+This project is licensed under the MIT License. See LICENSE for details.
