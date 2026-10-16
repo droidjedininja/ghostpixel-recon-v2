@@ -28,10 +28,6 @@ A tiny browser-based recon/workshop tool that checks whether an image URL loads 
 
 3. Enter an image URL and click "Run Scan". Results and a preview appear on success.
 
-## Deploy to GitHub Pages
-
-This repo includes a simple GitHub Actions workflow to publish the repository to GitHub Pages from the main branch.
-
 ## Implementation notes
 
 - Primary file: `index.html` (UI, JS, and CSS in a single file).
