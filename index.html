@@ -117,6 +117,7 @@ Large Image
 <script>
 
 const MAX_HISTORY = 50;
+let latestScanId = 0;
 
 function setTarget(url){
     document.getElementById("targetUrl").value=url;
@@ -195,6 +196,7 @@ function runScan(){
         return;
     }
 
+    const scanId = ++latestScanId;
     const img = new Image();
     const preview = document.getElementById('preview');
     preview.style.display = 'none';
@@ -203,6 +205,8 @@ function runScan(){
     const start = performance.now();
 
     img.onload = ()=>{
+
+        if(scanId !== latestScanId) return;
 
         const ms = Math.round(performance.now() - start);
 
@@ -225,6 +229,8 @@ function runScan(){
 
     img.onerror = (ev)=>{
 
+        if(scanId !== latestScanId) return;
+
         document.getElementById("results").innerHTML = `<div class="result">❌ Failed to load image. This may be a network/CORS issue or the resource does not exist.</div>`;
 
         preview.style.display = 'none';
@@ -238,8 +244,7 @@ function runScan(){
 
     };
 
-    // set crossOrigin to anonymous to try to avoid tainting canvas if later added
-    img.crossOrigin = 'anonymous';
+    // Dimensions are available without CORS; no canvas pixel access is needed.
     img.src = url;
 
 }
