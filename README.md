@@ -32,7 +32,8 @@ A tiny browser-based recon/workshop tool that checks whether an image URL loads 
 
 - Primary file: `index.html` (UI, JS, and CSS in a single file).
 - History is stored under localStorage key `ghostpixel-history` and capped to the most recent 50 records.
-- The app uses the Image() API and `performance.now()` to measure load times. `img.crossOrigin = 'anonymous'` is set to reduce canvas tainting if extended later.
+- The app uses the Image() API and `performance.now()` to measure load times. Images do not need CORS headers because the app does not read canvas pixels.
+- Only the latest scan updates the results, preview, and history; callbacks from superseded scans are ignored.
 
 ## Security & Privacy
 
