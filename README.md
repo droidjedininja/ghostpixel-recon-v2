@@ -1,4 +1,4 @@
-# GhostPixel — Bronx Edition
+# GhostPixel
 
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
