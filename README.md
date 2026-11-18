@@ -48,3 +48,5 @@ See .github/CONTRIBUTING.md for contribution guidelines. Small improvements, bug
 ## License
 
 This project is licensed under the MIT License. See LICENSE for details.
+
+Copyright © 2026 Freddie.
